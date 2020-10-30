@@ -6,7 +6,7 @@ import torch
 from mmcv import Config
 
 from mmdet import __version__
-from mmdet.apis import (get_root_logger, init_dist, set_random_seed,
+from mmdet.apis import (get_root_logger, set_random_seed,
                         train_detector)
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
@@ -65,11 +65,12 @@ def main():
         cfg.optimizer['lr'] = cfg.optimizer['lr'] * cfg.gpus / 8
 
     # init distributed env first, since logger depends on the dist info.
-    if args.launcher == 'none':
-        distributed = False
-    else:
-        distributed = True
-        init_dist(args.launcher, **cfg.dist_params)
+    # if args.launcher == 'none':
+    #     distributed = False
+    # else:
+    #     distributed = True
+    #     init_dist(args.launcher, **cfg.dist_params)
+    distributed = False
 
     # init logger before other steps
     logger = get_root_logger(cfg.log_level)
