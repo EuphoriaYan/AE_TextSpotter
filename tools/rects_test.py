@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, load_checkpoint
 
-from mmdet.apis import init_dist
+# from mmdet.apis import init_dist
 from mmdet.core import coco_eval, results2json, wrap_fp16_model
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.models import build_detector
@@ -231,11 +231,12 @@ def main():
     cfg.data.test.test_mode = True
 
     # init distributed env first, since logger depends on the dist info.
-    if args.launcher == 'none':
-        distributed = False
-    else:
-        distributed = True
-        init_dist(args.launcher, **cfg.dist_params)
+    # if args.launcher == 'none':
+        # distributed = False
+    # else:
+        # distributed = True
+        # init_dist(args.launcher, **cfg.dist_params)
+    distributed = False
 
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)
