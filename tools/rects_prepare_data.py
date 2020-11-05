@@ -6,6 +6,7 @@ print(f'root_path is {root_path}')
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
 
+
 import mmcv
 import os.path as osp
 
