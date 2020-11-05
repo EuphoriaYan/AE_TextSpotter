@@ -1,5 +1,5 @@
 # model settings
-data_root = 'data/FakeBookpages'
+data_root = 'data/FakeBookpages/'
 char_dict_file = 'char_dict.json'
 model = dict(
     type='AE_TextSpotter',
@@ -84,21 +84,7 @@ model = dict(
         loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0)),
     crm_cfg=dict(
         char_dict_file=data_root + char_dict_file,
-        char_assign_iou=0.3),
-    # language module
-    lm_cfg=dict(
-        dictmap_file=data_root + 'dictmap_to_lower.json',
-        bert_vocab_file='bert-base-tra-chinese/vocab.txt',
-        bert_cfg_file='bert-base-tra-chinese/bert_config.json',
-        bert_model_file='bert-base-tra-chinese/pytorch_model.bin',
-        sample_num=32,
-        pos_iou=0.8,
-        lang_score_weight=0.3,
-        lang_model=dict(
-            input_dim=768,
-            output_dim=2,
-            gru_num=2,
-            with_bi=True)))
+        char_assign_iou=0.3))
 # model training and testing settings
 train_cfg = dict(
     rpn=dict(
@@ -129,7 +115,7 @@ train_cfg = dict(
         nms_pre=2000,
         nms_post=2000,
         max_num=2000,
-        nms_thr=0.7,
+        nms_thr=0.5,
         min_bbox_size=0),
     rcnn=dict(
         assigner=dict(
@@ -147,36 +133,7 @@ train_cfg = dict(
         mask_size=28,
         pos_weight=-1,
         debug=False))
-test_cfg = dict(
-    text_rpn=dict(
-        nms_across_levels=False,
-        nms_pre=900,
-        nms_post=900,
-        max_num=900,
-        nms_thr=0.7,
-        min_bbox_size=0),
-    char_rpn=dict(
-        nms_across_levels=False,
-        nms_pre=900,
-        nms_post=900,
-        max_num=900,
-        nms_thr=0.5,  # 0.7
-        min_bbox_size=0),
-    text_rcnn=dict(
-        score_thr=0.01,
-        nms=dict(type='nms', iou_thr=0.9),
-        max_per_img=500,
-        mask_thr_binary=0.5),
-    char_rcnn=dict(
-        score_thr=0.1,
-        nms=dict(type='nms', iou_thr=0.1),
-        max_per_img=200,
-        mask_thr_binary=0.5),
-    recognizer=dict(
-        char_dict_file=data_root + char_dict_file,
-        char_assign_iou=0.5),
-    poly_iou=0.1,
-    ignore_thr=0.3)
+test_cfg=None
 # dataset settings
 dataset_type = 'ReCTSDataset'
 img_norm_cfg = dict(
@@ -195,31 +152,11 @@ train_pipeline = [
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
-    dict(type='Collect',
-         keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'],
-         meta_keys=['filename', 'annpath', 'ori_shape', 'img_shape', 'pad_shape', 'scale_factor', 'flip',
-                    'img_norm_cfg']),
-]
-test_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(
-        type='MultiScaleFlipAug',
-        img_scale=(1333, 800),
-        flip=False,
-        transforms=[
-            dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip'),
-            dict(type='Normalize', **img_norm_cfg),
-            dict(type='Pad', size_divisor=32),
-            dict(type='ImageToTensor', keys=['img']),
-            dict(type='Collect', keys=['img']),
-        ])
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
 ]
 data = dict(
-    imgs_per_gpu=8,
-    workers_per_gpu=8,
-    # imgs_per_gpu=1,
-    # workers_per_gpu=1,
+    imgs_per_gpu=2,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         data_root=data_root,
@@ -228,31 +165,15 @@ data = dict(
         cache_file='tda_rects_train_cache_file.json',
         char_dict_file=char_dict_file,
         pipeline=train_pipeline),
-    val=dict(
-        type=dataset_type,
-        data_root=data_root,
-        ann_file='train/gt/',
-        img_prefix='train/img/',
-        cache_file='tda_rects_val_cache_file.json',
-        char_dict_file=char_dict_file,
-        pipeline=test_pipeline),
-    test=dict(
-        type=dataset_type,
-        data_root=data_root,
-        ann_file=None,
-        img_prefix='test/img/',
-        cache_file='tda_rects_test_cache_file.json',
-        char_dict_file=char_dict_file,
-        pipeline=test_pipeline)
 )
 # optimizer
-optimizer = dict(type='SGD', lr=0.20, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=300,
+    warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[8, 11])
 checkpoint_config = dict(interval=1)
@@ -269,7 +190,7 @@ evaluation = dict(interval=1)
 total_epochs = 12
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = 'work_dirs/rects_ae_textspotter_lm_r50_1x/'
-load_from = 'work_dirs/rects_ae_textspotter_r50_1x/epoch_12.pth'
+work_dir = 'work_dirs/rects_ae_textspotter_r50_1x/'
+load_from = None
 resume_from = None
 workflow = [('train', 1)]
