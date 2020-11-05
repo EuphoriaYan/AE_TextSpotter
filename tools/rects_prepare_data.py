@@ -1,7 +1,15 @@
+
+import os
+import sys
+root_path = "/".join(os.path.realpath(__file__).split("/")[:-2])
+print(f'root_path is {root_path}')
+if root_path not in sys.path:
+    sys.path.insert(0, root_path)
+
 import mmcv
 import os.path as osp
 
-data_root = 'data/ReCTS/'
+data_root = 'data/FakeBookpages/'
 train_img_root = osp.join(data_root, 'train/img/')
 train_ann_root = osp.join(data_root, 'train/gt/')
 test_img_root = osp.join(data_root, 'test/img/')
