@@ -1,18 +1,17 @@
-
 import os
 import sys
+
 root_path = "/".join(os.path.realpath(__file__).split("/")[:-2])
 print(f'root_path is {root_path}')
 if root_path not in sys.path:
     sys.path.insert(0, root_path)
-
-import argparse
 
 import os.path as osp
 import shutil
 import tempfile
 import numpy as np
 import cv2
+import argparse
 
 import mmcv
 import torch
@@ -21,10 +20,14 @@ import torch.nn.functional as F
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, load_checkpoint
 
-# from mmdet.apis import init_dist
-from mmdet.core import wrap_fp16_model
+from mmdet.apis import init_dist
+from mmdet.core import coco_eval, results2json, wrap_fp16_model
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.models import build_detector
+import pycocotools.mask as maskUtils
+from mmdet.core import poly_nms
+from pytorch_transformers import BertTokenizer, BertConfig, BertModel
+import Polygon as plg
 
 
 def single_gpu_test(args, model, data_loader, show=False, bert_tokenizer=None, bert_model=None, text_model=None):
@@ -235,12 +238,11 @@ def main():
     cfg.data.test.test_mode = True
 
     # init distributed env first, since logger depends on the dist info.
-    # if args.launcher == 'none':
-        # distributed = False
-    # else:
-        # distributed = True
-        # init_dist(args.launcher, **cfg.dist_params)
-    distributed = False
+    if args.launcher == 'none':
+        distributed = False
+    else:
+        distributed = True
+        init_dist(args.launcher, **cfg.dist_params)
 
     # build the dataloader
     # TODO: support multiple images per gpu (only minor changes are needed)

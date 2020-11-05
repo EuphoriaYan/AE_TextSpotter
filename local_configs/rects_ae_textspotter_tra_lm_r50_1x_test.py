@@ -1,5 +1,5 @@
 # model settings
-data_root = 'data/FakeBookpages'
+data_root = 'data/FakeBookpages/'
 char_dict_file = 'char_dict.json'
 model = dict(
     type='AE_TextSpotter',
