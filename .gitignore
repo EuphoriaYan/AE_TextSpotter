@@ -124,3 +124,6 @@ vis/
 tmp/
 bert-base-*/
 temp.py
+
+# scripts
+scripts/
