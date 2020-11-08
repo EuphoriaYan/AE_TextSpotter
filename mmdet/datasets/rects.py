@@ -15,8 +15,16 @@ import cv2
 class ReCTSDataset(CustomDataset):
     CLASSES = ('char')
 
-    def __init__(self, ann_file, pipeline, data_root=None, img_prefix=None, seg_prefix=None, proposal_file=None,
-                 test_mode=False, cache_file=None, char_dict_file=None):
+    def __init__(self,
+                 ann_file,
+                 pipeline,
+                 data_root=None,
+                 img_prefix='',
+                 seg_prefix=None,
+                 proposal_file=None,
+                 test_mode=False,
+                 cache_file=None,
+                 char_dict_file=None):
         # super().__init__(ann_file, pipeline, data_root, img_prefix, seg_prefix, proposal_file, test_mode)
         self.ann_root = ann_file
         self.data_root = data_root
